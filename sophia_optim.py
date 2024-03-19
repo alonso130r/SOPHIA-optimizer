@@ -29,14 +29,14 @@ def hutchinson_hessian_diag_estimate(model, loss):
             # diag of hessian is element-wise product of v, Hv
             hessian_diag[param] = v[i].mul(hvp).detach()
         else:
-            # handle nograd
+            # handle no-grad
             hessian_diag[param] = torch.zeros_like(param)
 
     return hessian_diag
 
 
 class SophiaOptim(Optimizer):
-    def __init__(self, model, lr=1e-3, betas=(0.9, 0.999), eps=1e-8, rho=0.1, weight_decay=0.01):
+    def __init__(self, model, lr=1e-3, betas=(0.9, 0.999), eps=1e-8, rho=0.1, weight_decay=0.01, ema_decay=0.999):
         if not 0.0 <= lr:
             raise ValueError(f"Invalid lr: {lr}")
         if not 0.0 <= betas[0] < 1.0 or not 0.0 <= betas[1] < 1.0:
@@ -49,6 +49,10 @@ class SophiaOptim(Optimizer):
         self.model = model
         defaults = dict(lr=lr, betas=betas, eps=eps, rho=rho, weight_decay=weight_decay)
         super(SophiaOptim, self).__init__(model.parameters(), defaults)
+
+        # activate ema decay
+        self.ema_decay = ema_decay
+        self.ema_weights = {name: param.clone().detach() for name, param in model.named_parameters()}
 
     @torch.no_grad()
     def step(self, closure=None) -> None:
@@ -129,4 +133,20 @@ class SophiaOptim(Optimizer):
                     group['eps']))
                 p.data.add_(step_direction, alpha=-adaptive_lr)
 
+        # apply ema weights
+        for name, param in self.model.named_parameters():
+            if name in self.ema_weights:
+                ema_param = self.ema_weights[name]
+                ema_param.mul_(self.ema_decay).add_(param.data, alpha=1 - self.ema_decay)
+
         return loss
+
+    def apply_ema_weights(self):
+        for name, param in self.model.named_parameters():
+            if name in self.ema_weights:
+                param.data.copy_(self.ema_weights[name].data)
+
+    def restore_original_weights(self, original_weights):
+        for name, param in self.model.named_parameters():
+            if name in original_weights:
+                param.data.copy_(original_weights[name].data)

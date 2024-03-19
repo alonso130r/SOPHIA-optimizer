@@ -3,14 +3,29 @@ from lookahead import Lookahead
 
 """
 model = ...   (Your model)
-base_optimizer = SophiaOptim(model=model, lr=1e-3, betas=(0.9, 0.999), eps=1e-8, rho=0.1, weight_decay=0.01)
-lookahead_optimizer = Lookahead(optimizer=base_optimizer, k=5, alpha=0.5)
+# Initialize SophiaOptim and then wrap it with Lookahead
+base_optimizer = SophiaOptim(model, lr=1e-3, ...)
+lookahead_optimizer = Lookahead(base_optimizer, k=5, alpha=0.5)
 
-# In your training loop:
-for input, target in dataset:
-    lookahead_optimizer.zero_grad()
-    output = model(input)
-    loss = loss_fn(output, target)
-    loss.backward()
-    lookahead_optimizer.step()
+# Your training loop remains largely the same
+for epoch in range(num_epochs):
+    model.train()
+    for inputs, targets in train_loader:
+        lookahead_optimizer.zero_grad()
+        outputs = model(inputs)
+        loss = loss_function(outputs, targets)
+        loss.backward()
+        lookahead_optimizer.step()
+
+        # Update EMA weights here, referring to `base_optimizer`'s parameters if needed
+
+    # Apply EMA weights for evaluation
+    original_weights = {name: param.clone().detach() for name, param in model.named_parameters()}
+    # Assuming `apply_ema_weights` and `restore_original_weights` are modified to work with Lookahead
+    base_optimizer.apply_ema_weights(ema_weights)  # Implement this function based on earlier instructions
+
+    # Perform evaluation
+    # ...
+
+    base_optimizer.restore_original_weights(original_weights)
 """
