@@ -1,8 +1,5 @@
-import math
 import torch
-from torch import Tensor
 from torch.optim.optimizer import Optimizer
-from typing import List, Optional
 
 
 def hutchinson_hessian_diag_estimate(model, loss):
