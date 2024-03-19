@@ -133,7 +133,7 @@ class SophiaOptim(Optimizer):
                     group['eps']))
                 p.data.add_(step_direction, alpha=-adaptive_lr)
 
-        # apply ema weights
+        # apply ema
         for name, param in self.model.named_parameters():
             if name in self.ema_weights:
                 ema_param = self.ema_weights[name]
@@ -141,6 +141,7 @@ class SophiaOptim(Optimizer):
 
         return loss
 
+    # ema weight functions
     def apply_ema_weights(self):
         for name, param in self.model.named_parameters():
             if name in self.ema_weights:
