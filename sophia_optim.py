@@ -71,6 +71,11 @@ class SophiaOptim(Optimizer):
 
                 grad = p.grad.data
 
+                # decoupled weight decay
+                if group['weight_decay'] != 0:
+                    # apply directly to parameter
+                    p.data.mul_(1 - group['lr'] * group['weight_decay'])
+
                 # throw error for sparse gradients
                 if grad.is_sparse:
                     raise RuntimeError("Sophia does not support sparse gradients")
