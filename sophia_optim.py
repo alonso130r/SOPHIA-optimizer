@@ -18,16 +18,16 @@ def hutchinson_hessian_diag_estimate(model, loss):
         p.grad.zero_()
 
     # random rademacher dist for hessian-vector products
-    v = [torch.randint_like(p, high=2, device=p.device).float().mul_(2).sub_(1) for p in params]
+    v = [torch.randint_like(p, high=2, device=p.device).float().mul_(2).sub_(1) for p in model.parameters() if p.requires_grad]
 
     # compute hessian-vector product
     grad_params = torch.autograd.grad(loss, params, create_graph=True, allow_unused=True)
-    Hv = torch.autograd.grad(grad_params, params, create_graph=True, allow_unused=True)
+    Hv = torch.autograd.grad(grad_params, params, grad_outputs=v, allow_unused=True)
 
-    for param, hvp in zip(params, Hv):
+    for i, (param, hvp) in zip(params, Hv):
         if hvp is not None:
             # diag of hessian is element-wise product of v, Hv
-            hessian_diag[param] = v[param].mul(hvp).detach()
+            hessian_diag[param] = v[i].mul(hvp).detach()
         else:
             # handle nograd
             hessian_diag[param] = torch.zeros_like(param)
@@ -96,7 +96,8 @@ class SophiaOptim(Optimizer):
                 exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)
 
                 # update hessian diagonal approx
-                exp_hessian_diag.mul_(beta2).add_(1 - beta2, hessian_diag_estimates[p])
+                if p in hessian_diag_estimates:
+                    exp_hessian_diag.mul_(beta2).add_(1 - beta2, hessian_diag_estimates[p])
 
                 # bias correction
                 bias_correction1 = 1 - beta1 ** state['step']
@@ -114,8 +115,13 @@ class SophiaOptim(Optimizer):
 
                 # apply update w/ weight decay
                 if group['weight_decay'] > 0:
-                    p.data.add_(p.data, alpha=-group['weight_decay'])
+                    p.data.mul_(1 - group['lr'] * group['weight_decay'])
 
                 p.data.add_(step_direction, alpha=-group['lr'])
+
+                # apply adaptive lr
+                adaptive_lr = group['lr'] / (corrected_exp_hessian_diag.sqrt().add_(
+                    group['eps']))
+                p.data.add_(step_direction, alpha=-adaptive_lr)
 
         return loss
