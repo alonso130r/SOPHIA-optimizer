@@ -1,4 +1,4 @@
-#### Advanced PyTorch Optimizer: SophiaOptim
+##### Advanced PyTorch Optimizer: SophiaOptim
 
 ### Overview
 
