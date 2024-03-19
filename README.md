@@ -1,4 +1,4 @@
-##### Advanced PyTorch Optimizer: SophiaOptim
+# Advanced PyTorch Optimizer: SophiaOptim
 
 ### Overview
 
@@ -30,4 +30,4 @@ To integrate SophiaOptim into your training loop, initialize the optimizer with 
 optimizer = SophiaOptim(model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, rho=0.1, weight_decay=0.01, ema_decay=0.999)
 `
 
-# Use the optimizer in your training loop as you would with any standard PyTorch optimizer. Remember to update the EMA weights and apply them for model evaluation.
+##### Use the optimizer in your training loop as you would with any standard PyTorch optimizer. Remember to update the EMA weights and apply them for model evaluation.
