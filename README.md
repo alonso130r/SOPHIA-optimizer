@@ -2,7 +2,7 @@
 
 ### Overview
 
-This project introduces SophiaOptim, a custom PyTorch optimizer designed to enhance the training performance of deep learning models. SophiaOptim integrates sophisticated optimization techniques, including Lookahead mechanics and Exponential Moving Average (EMA) of model weights, alongside adaptive learning rates and Hessian-based updates for efficient and robust model optimization.
+This project introduces SophiaOptim, my take on the Sophia (Second-order Clipped Stochastic Optimization) optimizer. A custom PyTorch optimizer designed to enhance the training performance of deep learning models, SophiaOptim integrates sophisticated optimization techniques, including Lookahead mechanics and Exponential Moving Average (EMA) of model weights, alongside adaptive learning rates and Hessian-based updates for efficient and robust model optimization.
 
 ### Features
 
