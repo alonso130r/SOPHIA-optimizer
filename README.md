@@ -14,7 +14,7 @@ Hutchinson’s Hessian Estimation: Estimates the Hessian diagonal efficiently us
 
 ### Installation
 
-To use SophiaOptim in your project, ensure you have PyTorch installed. Clone this repository and import SophiaOptim into your training script:
+To use SophiaOptim in your project, ensure you have PyTorch installed. Clone this repository and import SophiaOptim and Lookahead into your training script:
 
 
 `
@@ -23,6 +23,7 @@ git clone https://github.com/alonso130r/SOPHIA-optimizer.git
 
 ```
 from sophia_optim import SophiaOptim
+from lookahead import Lookahead
 ```
 
 ### Usage
